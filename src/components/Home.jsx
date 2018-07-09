@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { func, object } from 'prop-types';
 import { connect } from 'react-redux';
-import { defaultAction } from '../actions/defaultActions';
+import { errorAction, defaultAction } from '../actions/defaultActions';
 
 export class Home extends Component {
   static propTypes = {
@@ -17,9 +17,16 @@ export class Home extends Component {
     this.setState({ text: e.target.value });
   };
 
-  onClick = () => {
-    this.props.defaultAction(this.state.text);
-    this.setState({ text: '' });
+  onSubmit = e => {
+    e.preventDefault();
+
+    if (this.state.text !== '') {
+      this.props.defaultAction(this.state.text);
+      this.setState({ text: '' });
+    } else {
+      this.props.errorAction();
+      this.nameInput.focus();
+    }
   };
 
   render() {
@@ -32,33 +39,41 @@ export class Home extends Component {
     };
 
     return (
-      <div className="home">
-        <div className="container">
-          <div className="row">
-            <div className="col-md-12">
-              <h1>Home</h1>
-              <input
-                type="text"
-                onChange={this.onChange}
-                value={this.state.text}
-              />
-              <button type="button" onClick={this.onClick}>
-                Submit
-              </button>
-              <Texts />
-            </div>
-          </div>
+      <form className="home" onSubmit={this.onSubmit}>
+        <div className="form-group">
+          <h1>Home</h1>
+          <br />
+          <h2>Add Text to List</h2>
         </div>
-      </div>
+        <div className="form-group">
+          <input
+            placeholder={this.props.error ? this.props.error : ''}
+            ref={input => {
+              this.nameInput = input;
+            }}
+            onChange={this.onChange}
+            className="form-control"
+            type="text"
+            value={this.state.text}
+          />
+          <button className="btn btn-primary btn-block" type="submit">
+            Submit
+          </button>
+        </div>
+        <div className="form-group">
+          <Texts />
+        </div>
+      </form>
     );
   }
 }
 
 const mapStateToProps = state => ({
+  error: state.error,
   data: state.data
 });
 
-const mapDispatchToProps = { defaultAction };
+const mapDispatchToProps = { errorAction, defaultAction };
 
 export default connect(
   mapStateToProps,
